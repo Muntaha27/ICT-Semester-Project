@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Meta & Title -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Find and filter rides on CampusCarpool">
+  <title>Find a Ride — CampusCarpool</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="images/logo.png">
+</head>
+<body>
+  <!-- Header -->
+  <header class="site-header">
+    <a class="brand" href="index.html">
+      <img src="images/logo.png" alt="CampusCarpool logo" class="logo">
+      <span class="brand-text">CampusCarpool</span>
+    </a>
+    <nav class="nav">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="rides.html" class="nav-link active">Find a Ride</a>
+      <a href="index.html#about" class="nav-link">About</a>
+    </nav>
+  </header>
+
+  <!-- Page head -->
+  <section class="page-head">
+    <div class="container">
+      <h1 class="section-title">Find a ride</h1>
+      <p class="muted">Filter by pickup, destination, date/time, and ride type. Select a card to view details.</p>
+    </div>
+  </section>
+
+  <!-- Filter form -->
+  <section class="filters">
+    <div class="container">
+      <form id="rideFilterForm" class="filter-form" novalidate>
+        <!-- Pickup -->
+        <div class="form-group">
+          <label for="pickup" class="form-label">Pickup location</label>
+          <input type="text" id="pickup" name="pickup" class="input" placeholder="e.g., Main Gate, CS Dept">
+          <small class="error" id="pickupError" hidden>Please enter at least 2 characters.</small>
+        </div>
+
+        <!-- Destination -->
+        <div class="form-group">
+          <label for="destination" class="form-label">Destination</label>
+          <input type="text" id="destination" name="destination" class="input" placeholder="e.g., Lahore, Hostel-A, Bus Station">
+          <small class="error" id="destinationError" hidden>Please enter at least 2 characters.</small>
+        </div>
+
+        <!-- Date -->
+        <div class="form-group">
+          <label for="date" class="form-label">Date</label>
+          <input type="date" id="date" name="date" class="input">
+        </div>
+
+        <!-- Time -->
+        <div class="form-group">
+          <label for="time" class="form-label">Time</label>
+          <input type="time" id="time" name="time" class="input">
+        </div>
+
+        <!-- Type -->
+        <div class="form-group">
+          <label for="type" class="form-label">Type of ride</label>
+          <select id="type" name="type" class="input">
+            <option value="">Any</option>
+            <option value="home">Going Home</option>
+            <option value="station">Going to Bus Station</option>
+            <option value="hostel">Going to Hostel</option>
+          </select>
+        </div>
+
+        <!-- Actions -->
+        <div class="form-actions">
+          <button type="submit" class="btn">Apply Filters</button>
+          <button type="button" id="resetFilters" class="btn btn-secondary">Reset</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- Rides grid -->
+  <section class="ride-results">
+    <div class="container">
+      <div id="ridesGrid" class="grid">
+        <!-- JS will render ride cards here -->
+      </div>
+      <div id="noResults" class="empty" hidden>No rides match your filters. Try adjusting date/time or destinations.</div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container footer-content">
+      <div class="footer-links">
+        <a href="index.html" class="footer-link">Home</a>
+        <a href="rides.html" class="footer-link">Find a Ride</a>
+        <a href="index.html#about" class="footer-link">About</a>
+      </div>
+      <div class="footer-copy">© 2025 CampusCarpool Co.</div>
+    </div>
+  </footer>
+
+  <!-- App JS -->
+  <script src="js/app.js"></script>
+  <script>
+    // Initialize the rides page
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('rideFilterForm');
+      const resetBtn = document.getElementById('resetFilters');
+
+      // Initial render
+      window.CampusCarpool.renderRides();
+
+      // Apply filters with basic validation
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const pickup = document.getElementById('pickup').value.trim();
+        const destination = document.getElementById('destination').value.trim();
+
+        // Show validation messages only if input exists but is too short
+        document.getElementById('pickupError').hidden = !(pickup && pickup.length < 2);
+        document.getElementById('destinationError').hidden = !(destination && destination.length < 2);
+
+        const filters = {
+          pickup,
+          destination,
+          date: document.getElementById('date').value,
+          time: document.getElementById('time').value,
+          type: document.getElementById('type').value
+        };
+
+        window.CampusCarpool.renderRides(filters);
+      });
+
+      // Reset filters
+      resetBtn.addEventListener('click', () => {
+        form.reset();
+        document.getElementById('pickupError').hidden = true;
+        document.getElementById('destinationError').hidden = true;
+        window.CampusCarpool.renderRides();
+      });
+    });
+  </script>
+</body>
+</html>

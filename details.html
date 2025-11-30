@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Meta & Title -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Ride details with live rider count and fare per rider">
+  <title>Ride Details — CampusCarpool</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="images/logo.png">
+</head>
+<body>
+  <!-- Header -->
+  <header class="site-header">
+    <a class="brand" href="index.html">
+      <img src="images/logo.png" alt="CampusCarpool logo" class="logo">
+      <span class="brand-text">CampusCarpool</span>
+    </a>
+    <nav class="nav">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="rides.html" class="nav-link">Find a Ride</a>
+      <a href="index.html#about" class="nav-link">About</a>
+    </nav>
+  </header>
+
+  <!-- Details -->
+  <section class="details">
+    <div class="container">
+      <h1 class="section-title">Ride details</h1>
+
+      <div class="details-layout">
+        <!-- Information card -->
+        <div class="details-card">
+          <div class="driver">
+            <img id="driverPhoto" src="images/driver1.jpeg" alt="Driver photo" class="driver-photo">
+            <div>
+              <h3 id="driverName" class="card-title">Driver Name</h3>
+              <p id="contact" class="muted">email@example.com | +92-300-0000000</p>
+            </div>
+          </div>
+
+          <div class="car">
+            <p><strong>Car model:</strong> <span id="carModel">—</span></p>
+            <p><strong>Color:</strong> <span id="carColor">—</span></p>
+            <p><strong>Number plate:</strong> <span id="numberPlate">—</span></p>
+          </div>
+
+          <div class="route">
+            <p><strong>Pickup:</strong> <span id="pickup">—</span></p>
+            <p><strong>Destination:</strong> <span id="destination">—</span></p>
+            <p><strong>Departure:</strong> <span id="departure">—</span></p>
+          </div>
+
+          <div class="fare">
+            <p><strong>Total riders joined:</strong> <span id="ridersCount">—</span></p>
+            <p><strong>Fare per rider:</strong> PKR <span id="farePerRider">—</span></p>
+          </div>
+
+          <!-- Live rider counter controls -->
+          <div class="counter">
+            <label class="form-label">Select seats to join:</label>
+            <div class="counter-row">
+              <button class="btn btn-secondary" id="decRiders">−</button>
+              <input type="number" id="joinSeats" min="1" value="1" class="input" style="max-width:100px">
+              <button class="btn btn-secondary" id="incRiders">+</button>
+            </div>
+            <small class="muted" id="capacityHint">Up to available seats.</small>
+          </div>
+
+          <div class="actions">
+            <button id="joinRide" class="btn">Confirm Ride</button>
+            <small class="muted">Fare per rider updates as riders increase.</small>
+          </div>
+        </div>
+
+        <!-- Map card -->
+        <div class="map-card">
+          <h3 class="card-title">Route map</h3>
+          <!-- Google Maps iframe embed (no API key) -->
+          <div class="map-frame">
+            <iframe
+              id="mapIframe"
+              src="https://www.google.com/maps?q=University%20to%20City&output=embed"
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+              title="Google Maps route">
+            </iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container footer-content">
+      <div class="footer-links">
+        <a href="index.html" class="footer-link">Home</a>
+        <a href="rides.html" class="footer-link">Find a Ride</a>
+        <a href="index.html#about" class="footer-link">About</a>
+      </div>
+      <div class="footer-copy">© 2025 CampusCarpool Co.</div>
+    </div>
+  </footer>
+
+  <!-- App JS -->
+  <script src="js/app.js"></script>
+  <script>
+    // Populate details from selected ride stored in localStorage
+    document.addEventListener('DOMContentLoaded', () => {
+      const ride = window.CampusCarpool.getSelectedRide();
+      if (!ride) {
+        window.location.href = 'rides.html';
+        return;
+      }
+
+      // Fill driver & car info
+      document.getElementById('driverName').textContent = ride.driver.name;
+      document.getElementById('driverPhoto').src = ride.driver.photo || 'images/driver1.jpeg';
+      document.getElementById('contact').textContent = `${ride.driver.email} | ${ride.driver.phone}`;
+      document.getElementById('carModel').textContent = ride.car.model;
+      document.getElementById('carColor').textContent = ride.car.color;
+      document.getElementById('numberPlate').textContent = ride.car.plate;
+
+      // Route info
+      document.getElementById('pickup').textContent = ride.pickup;
+      document.getElementById('destination').textContent = ride.destination;
+      document.getElementById('departure').textContent = `${ride.date} ${ride.time}`;
+
+      // Riders & fare per rider
+      document.getElementById('ridersCount').textContent = ride.riders;
+      document.getElementById('farePerRider').textContent = Math.round(ride.totalFare / Math.max(ride.riders, 1));
+
+      // Map embed using pickup and destination names
+      const mapUrl = `https://www.google.com/maps?q=${encodeURIComponent(ride.pickup + ' to ' + ride.destination)}&output=embed`;
+      document.getElementById('mapIframe').src = mapUrl;
+
+      // Capacity hint
+      document.getElementById('capacityHint').textContent = `Up to ${ride.seatsAvailable} available seat(s).`;
+
+      // Live rider counter controls (choose seats to join)
+      const joinSeats = document.getElementById('joinSeats');
+      document.getElementById('incRiders').addEventListener('click', () => {
+        const val = parseInt(joinSeats.value || '1', 10);
+        joinSeats.value = Math.min(val + 1, ride.seatsAvailable);
+      });
+      document.getElementById('decRiders').addEventListener('click', () => {
+        const val = parseInt(joinSeats.value || '1', 10);
+        joinSeats.value = Math.max(val - 1, 1);
+      });
+
+      // Confirm ride: increments riders count and updates fare per rider
+      document.getElementById('joinRide').addEventListener('click', () => {
+        const seatsRequested = Math.max(1, Math.min(parseInt(joinSeats.value || '1', 10), ride.seatsAvailable));
+        const updated = window.CampusCarpool.joinSelectedRide(seatsRequested);
+        document.getElementById('ridersCount').textContent = updated.riders;
+        document.getElementById('farePerRider').textContent = Math.round(updated.totalFare / Math.max(updated.riders, 1));
+        alert('Ride confirmed! The driver will contact you via email/phone.');
+      });
+    });
+  </script>
+</body>
+</html>
